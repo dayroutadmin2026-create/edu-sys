@@ -139,6 +139,45 @@
     
     #appFrame.show { opacity: 1; }
     
+    /* ===== زر التثبيت ===== */
+    #installBanner {
+      display: none;
+      position: fixed;
+      bottom: 25px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+      color: #1e1b4b;
+      padding: 16px 28px;
+      border-radius: 50px;
+      font-family: 'Tajawal', sans-serif;
+      font-size: 15px;
+      font-weight: 800;
+      box-shadow: 0 15px 40px rgba(251,191,36,0.5);
+      z-index: 2000;
+      cursor: pointer;
+      border: none;
+      animation: slideUp 0.6s ease;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    @keyframes slideUp {
+      from { 
+        transform: translateX(-50%) translateY(40px); 
+        opacity: 0; 
+      }
+      to { 
+        transform: translateX(-50%) translateY(0); 
+        opacity: 1; 
+      }
+    }
+    
+    #installBanner:hover {
+      transform: translateX(-50%) translateY(-3px);
+      box-shadow: 0 20px 50px rgba(251,191,36,0.7);
+    }
+    
     /* ===== زر الطوارئ ===== */
     #fallbackBtn {
       display: none;
@@ -161,17 +200,6 @@
       animation: slideUp 0.6s ease;
       align-items: center;
       gap: 10px;
-    }
-    
-    @keyframes slideUp {
-      from { 
-        transform: translateX(-50%) translateY(40px); 
-        opacity: 0; 
-      }
-      to { 
-        transform: translateX(-50%) translateY(0); 
-        opacity: 1; 
-      }
     }
     
     /* ===== التجاوب ===== */
@@ -205,6 +233,12 @@
     title="لوحة التحكم">
   </iframe>
 
+  <!-- ✅ زر التثبيت (جديد) -->
+  <button id="installBanner" onclick="installApp()">
+    <i class="fas fa-mobile-alt"></i>
+    <span>تثبيت لوحة التحكم كتطبيق</span>
+  </button>
+
   <!-- زر الطوارئ -->
   <a id="fallbackBtn" href="#" target="_blank">
     <i class="fas fa-external-link-alt"></i>
@@ -236,6 +270,30 @@
         fallbackBtn.style.display = 'flex';
       }
     }, 10000);
+
+    // ✅ ===== PWA Install (جديد) =====
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      // إظهار زر التثبيت بعد 3 ثوانٍ
+      setTimeout(() => {
+        document.getElementById('installBanner').style.display = 'flex';
+      }, 3000);
+    });
+
+    function installApp() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(choice => {
+          if (choice.outcome === 'accepted') {
+            console.log('تم تثبيت التطبيق');
+          }
+          document.getElementById('installBanner').style.display = 'none';
+          deferredPrompt = null;
+        });
+      }
+    }
 
     // ===== تسجيل Service Worker =====
     if ('serviceWorker' in navigator) {
