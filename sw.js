@@ -1,16 +1,16 @@
 const CACHE_NAME = 'diroot-v1';
-const OFFLINE_URL = '/diroot-pwa/offline.html';
+const OFFLINE_URL = 'offline.html';
 
 // ===== التثبيت =====
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
       return cache.addAll([
-        '/diroot-pwa/',
-        '/diroot-pwa/index.html',
-        '/diroot-pwa/admin.html',
-        '/diroot-pwa/offline.html',
-        '/diroot-pwa/manifest.json'
+        './',
+        './index.html',
+        './admin.html',
+        './offline.html',
+        './manifest.json'
       ]);
     })
   );
