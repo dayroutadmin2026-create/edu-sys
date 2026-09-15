@@ -5,13 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>لوحة التحكم - إدارة ديروط التعليمية</title>
   
-  <!-- PWA Meta Tags -->
-  <link rel="manifest" href="./manifest.json">
-  <meta name="theme-color" content="#1e1b4b">
+  <!-- ✅ PWA Meta Tags - manifest منفصل -->
+  <link rel="manifest" href="./manifest-admin.json">
+  <meta name="theme-color" content="#fbbf24">
+  <meta name="background-color" content="#1e1b4b">
+  <meta name="color-scheme" content="dark">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="لوحة ديروط">
-  <link rel="apple-touch-icon" href="./icon-192.png">
+  <link rel="apple-touch-icon" href="./icon-admin-192.png">
   
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
@@ -20,12 +22,15 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     
-    body {
-      font-family: 'Tajawal', sans-serif;
-      background: #0f172a;
+    html, body {
+      background: #1e1b4b !important;
       overflow: hidden;
       height: 100vh;
       width: 100vw;
+    }
+    
+    body {
+      font-family: 'Tajawal', sans-serif;
     }
     
     /* ===== شاشة التحميل ===== */
@@ -202,7 +207,6 @@
       gap: 10px;
     }
     
-    /* ===== التجاوب ===== */
     @media (max-width: 480px) {
       .splash-logo { width: 110px; height: 110px; font-size: 54px; }
       .splash-title { font-size: 28px; }
@@ -214,7 +218,7 @@
 
   <!-- شاشة التحميل -->
   <div id="splash">
-    <div class="splash-logo">🛡️</div>
+    <div class="splash-logo">️</div>
     <div class="splash-title">لوحة تحكم المدير العام</div>
     <div class="splash-sub">إدارة ديروط التعليمية</div>
     <div class="splash-loader">
@@ -233,7 +237,7 @@
     title="لوحة التحكم">
   </iframe>
 
-  <!-- ✅ زر التثبيت (جديد) -->
+  <!-- زر التثبيت -->
   <button id="installBanner" onclick="installApp()">
     <i class="fas fa-mobile-alt"></i>
     <span>تثبيت لوحة التحكم كتطبيق</span>
@@ -248,7 +252,6 @@
   <script>
     // ===== رابط التطبيق =====
     const APP_URL = 'https://script.google.com/macros/s/AKfycby3xcbo_ONrEtevq3Y0YcGhRiiF9Dp-N9qxhm0UMRfgcNCnNRURvG-ZNf2jm4MNkpcgiQ/exec?admin=true';
-    
     document.getElementById('fallbackBtn').href = APP_URL;
 
     const frame = document.getElementById('appFrame');
@@ -271,12 +274,11 @@
       }
     }, 10000);
 
-    // ✅ ===== PWA Install (جديد) =====
+    // ===== PWA Install =====
     let deferredPrompt;
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
-      // إظهار زر التثبيت بعد 3 ثوانٍ
       setTimeout(() => {
         document.getElementById('installBanner').style.display = 'flex';
       }, 3000);
@@ -287,7 +289,7 @@
         deferredPrompt.prompt();
         deferredPrompt.userChoice.then(choice => {
           if (choice.outcome === 'accepted') {
-            console.log('تم تثبيت التطبيق');
+            console.log('✅ تم تثبيت لوحة التحكم');
           }
           document.getElementById('installBanner').style.display = 'none';
           deferredPrompt = null;
@@ -295,11 +297,11 @@
       }
     }
 
-    // ===== تسجيل Service Worker =====
+    // ✅ تسجيل Service Worker المنفصل
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js')
-        .then(() => console.log('SW registered'))
-        .catch(err => console.log('SW failed:', err));
+      navigator.serviceWorker.register('./sw-admin.js')
+        .then(() => console.log('Admin SW registered'))
+        .catch(err => console.log('Admin SW failed:', err));
     }
   </script>
 </body>
