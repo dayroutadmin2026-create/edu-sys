@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>نظام المتابعة - إدارة ديروط التعليمية</title>
+  
+  <!-- PWA Meta Tags -->
+  <link rel="manifest" href="/diroot-pwa/manifest.json">
+  <meta name="theme-color" content="#4f46e5">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="متابعة ديروط">
+  <link rel="apple-touch-icon" href="/diroot-pwa/icon-192.png">
+  
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'Tajawal', sans-serif;
+      background: #0f172a;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+    
+    /* ===== شاشة التحميل الاحترافية ===== */
+    #splash {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(135deg, #1e1b4b 0%, #312e81 30%, #4f46e5 60%, #7c3aed 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    
+    #splash.hide {
+      opacity: 0;
+      transform: scale(1.1);
+      pointer-events: none;
+    }
+    
+    .splash-logo {
+      width: 120px;
+      height: 120px;
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(20px);
+      border-radius: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 56px;
+      margin-bottom: 28px;
+      border: 2px solid rgba(255,255,255,0.25);
+      animation: logoPulse 2.5s ease-in-out infinite;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    
+    @keyframes logoPulse {
+      0%, 100% { 
+        transform: scale(1); 
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      }
+      50% { 
+        transform: scale(1.08); 
+        box-shadow: 0 30px 80px rgba(79, 70, 229, 0.5);
+      }
+    }
+    
+    .splash-title {
+      color: white;
+      font-size: 32px;
+      font-weight: 900;
+      margin-bottom: 12px;
+      text-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      letter-spacing: 0.5px;
+    }
+    
+    .splash-sub {
+      color: rgba(255,255,255,0.85);
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: 50px;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+    
+    .splash-loader {
+      width: 240px;
+      height: 5px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    .splash-loader-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #a5b4fc, #c4b5fd, #f0abfc, #fbcfe8);
+      border-radius: 10px;
+      width: 0%;
+      animation: loadBar 2.5s ease-in-out forwards;
+      box-shadow: 0 0 20px rgba(165, 180, 252, 0.5);
+    }
+    
+    @keyframes loadBar {
+      0% { width: 0%; }
+      30% { width: 35%; }
+      60% { width: 70%; }
+      100% { width: 100%; }
+    }
+    
+    .splash-footer {
+      position: absolute;
+      bottom: 35px;
+      color: rgba(255,255,255,0.6);
+      font-size: 13px;
+      font-weight: 500;
+    }
+    
+    /* ===== الـ iframe بملء الشاشة ===== */
+    #appFrame {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+      opacity: 0;
+      transition: opacity 0.6s ease;
+      background: white;
+    }
+    
+    #appFrame.show { opacity: 1; }
+    
+    /* ===== زر التثبيت ===== */
+    #installBanner {
+      display: none;
+      position: fixed;
+      bottom: 25px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+      padding: 16px 28px;
+      border-radius: 50px;
+      font-family: 'Tajawal', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      box-shadow: 0 15px 40px rgba(16,185,129,0.5);
+      z-index: 2000;
+      cursor: pointer;
+      border: none;
+      animation: slideUp 0.6s ease;
+      display: none;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    @keyframes slideUp {
+      from { 
+        transform: translateX(-50%) translateY(40px); 
+        opacity: 0; 
+      }
+      to { 
+        transform: translateX(-50%) translateY(0); 
+        opacity: 1; 
+      }
+    }
+    
+    #installBanner:hover {
+      transform: translateX(-50%) translateY(-3px);
+      box-shadow: 0 20px 50px rgba(16,185,129,0.6);
+    }
+    
+    /* ===== زر الطوارئ ===== */
+    #fallbackBtn {
+      display: none;
+      position: fixed;
+      bottom: 25px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: white;
+      padding: 16px 28px;
+      border-radius: 50px;
+      font-family: 'Tajawal', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      box-shadow: 0 15px 40px rgba(239,68,68,0.5);
+      z-index: 2000;
+      cursor: pointer;
+      border: none;
+      text-decoration: none;
+      animation: slideUp 0.6s ease;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    /* ===== التجاوب ===== */
+    @media (max-width: 480px) {
+      .splash-logo { width: 100px; height: 100px; font-size: 48px; }
+      .splash-title { font-size: 26px; }
+      .splash-sub { font-size: 14px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- شاشة التحميل -->
+  <div id="splash">
+    <div class="splash-logo">🏫</div>
+    <div class="splash-title">إدارة ديروط التعليمية</div>
+    <div class="splash-sub">نظام المتابعة اليومية للمدارس</div>
+    <div class="splash-loader">
+      <div class="splash-loader-bar"></div>
+    </div>
+    <div class="splash-footer">
+      تصميم وتطوير: أ/ محمود حسن خرابة
+    </div>
+  </div>
+
+  <!-- الـ iframe (التطبيق الفعلي) -->
+  <iframe id="appFrame" 
+    src="https://script.google.com/macros/s/AKfycby3xcbo_ONrEtevq3Y0YcGhRiiF9Dp-N9qxhm0UMRfgcNCnNRURvG-ZNf2jm4MNkpcgiQ/exec"
+    sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-top-navigation"
+    allow="fullscreen; camera; microphone; geolocation; clipboard-write"
+    title="نظام المتابعة">
+  </iframe>
+
+  <!-- زر التثبيت -->
+  <button id="installBanner" onclick="installApp()">
+    <i class="fas fa-mobile-alt"></i>
+    <span>تثبيت التطبيق على جهازك</span>
+  </button>
+
+  <!-- زر الطوارئ -->
+  <a id="fallbackBtn" href="#" target="_blank">
+    <i class="fas fa-external-link-alt"></i>
+    <span>فتح التطبيق مباشرة</span>
+  </a>
+
+  <script>
+    // ===== رابط التطبيق =====
+    const APP_URL = 'https://script.google.com/macros/s/AKfycby3xcbo_ONrEtevq3Y0YcGhRiiF9Dp-N9qxhm0UMRfgcNCnNRURvG-ZNf2jm4MNkpcgiQ/exec';
+    
+    // تحديث رابط زر الطوارئ
+    document.getElementById('fallbackBtn').href = APP_URL;
+
+    const frame = document.getElementById('appFrame');
+    const splash = document.getElementById('splash');
+    const fallbackBtn = document.getElementById('fallbackBtn');
+
+    // ===== إخفاء شاشة التحميل عند نجاح التحميل =====
+    frame.onload = function() {
+      setTimeout(() => {
+        splash.classList.add('hide');
+        frame.classList.add('show');
+      }, 600);
+    };
+
+    // ===== خطة الطوارئ: إذا فشل التحميل خلال 10 ثوانٍ =====
+    setTimeout(() => {
+      if (!splash.classList.contains('hide')) {
+        splash.style.opacity = '0.3';
+        fallbackBtn.style.display = 'flex';
+      }
+    }, 10000);
+
+    // ===== PWA Install =====
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      setTimeout(() => {
+        document.getElementById('installBanner').style.display = 'flex';
+      }, 3000);
+    });
+
+    function installApp() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(choice => {
+          document.getElementById('installBanner').style.display = 'none';
+          deferredPrompt = null;
+        });
+      }
+    }
+
+    // ===== تسجيل Service Worker =====
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/diroot-pwa/sw.js')
+        .then(() => console.log('SW registered'))
+        .catch(err => console.log('SW failed:', err));
+    }
+  </script>
+</body>
+</html>
