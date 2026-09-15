@@ -5,13 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>نظام المتابعة - إدارة ديروط التعليمية</title>
   
-  <!-- PWA Meta Tags -->
-  <link rel="manifest" href="manifest.json">
+  <!-- PWA Meta Tags - مسارات نسبية -->
+  <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#4f46e5">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="متابعة ديروط">
-  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="apple-touch-icon" href="./icon-192.png">
   
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
@@ -157,7 +157,6 @@
       cursor: pointer;
       border: none;
       animation: slideUp 0.6s ease;
-      display: none;
       align-items: center;
       gap: 10px;
     }
@@ -227,7 +226,7 @@
 
   <!-- الـ iframe (التطبيق الفعلي) -->
   <iframe id="appFrame" 
-    src="https://script.google.com/macros/s/AKfycby3xcbo_ONrEtevq3Y0YcGhRiiF9Dp-N9qxhm0UMRfgcNCnNRURvG-ZNf2jm4MNkpcgiQ/exec"
+    src="https://script.google.com/macros/s/ضع_هنا_معرف_التطبيق_الحقيقي/exec"
     sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-top-navigation"
     allow="fullscreen; camera; microphone; geolocation; clipboard-write"
     title="نظام المتابعة">
@@ -247,7 +246,7 @@
 
   <script>
     // ===== رابط التطبيق =====
-    const APP_URL = 'https://script.google.com/macros/s/AKfycby3xcbo_ONrEtevq3Y0YcGhRiiF9Dp-N9qxhm0UMRfgcNCnNRURvG-ZNf2jm4MNkpcgiQ/exec';
+    const APP_URL = 'https://script.google.com/macros/s/ضع_هنا_معرف_التطبيق_الحقيقي/exec';
     
     // تحديث رابط زر الطوارئ
     document.getElementById('fallbackBtn').href = APP_URL;
@@ -294,7 +293,7 @@
 
     // ===== تسجيل Service Worker =====
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js')
+      navigator.serviceWorker.register('./sw.js')
         .then(() => console.log('SW registered'))
         .catch(err => console.log('SW failed:', err));
     }
