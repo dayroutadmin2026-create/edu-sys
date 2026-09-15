@@ -1,5 +1,5 @@
 const CACHE_NAME = 'diroot-v1';
-const OFFLINE_URL = 'offline.html';
+const OFFLINE_URL = './offline.html';
 
 // ===== التثبيت =====
 self.addEventListener('install', event => {
