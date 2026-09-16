@@ -2,11 +2,9 @@
   "name": "نظام المتابعة اليومية - إدارة ديروط التعليمية",
   "short_name": "متابعة ديروط",
   "description": "نظام المتابعة اليومية لمدارس إدارة ديروط التعليمية",
-  "id": "./index.html",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "orientation": "portrait", 
   "display_override": ["window-controls-overlay", "standalone", "fullscreen"],
   "orientation": "portrait",
   "background_color": "#1e1b4b",
@@ -29,6 +27,20 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "./screenshot-wide.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide"
+    },
+    {
+      "src": "./screenshot-narrow.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow"
     }
   ]
 }
