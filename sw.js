@@ -1,4 +1,4 @@
-const CACHE_NAME = 'diroot-v1';
+const CACHE_NAME = 'diroot-v2';
 const OFFLINE_URL = './offline.html';
 
 // ===== التثبيت =====
