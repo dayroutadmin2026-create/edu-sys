@@ -1,275 +1,151 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>نظام المتابعة - إدارة ديروط التعليمية</title>
-  
-  <!-- PWA Meta Tags -->
-  <link rel="manifest" href="./manifest.json">
-  <meta name="theme-color" content="#1e1b4b">
-  <meta name="background-color" content="#1e1b4b">
-  <meta name="color-scheme" content="dark">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="نظام متابعة المدارس">
-  <link rel="apple-touch-icon" href="./icon-192.png">
-  <link rel="manifest" href="./manifest.json">   
-  <meta name="theme-color" content="#4f46e5">  
-  
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
-  
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    
-    /* ✅ مهم: منع الوميض الأبيض */
-    html, body {
-      background: #1e1b4b !important;
-      overflow: hidden;
-      height: 100vh;
-      width: 100vw;
-    }
-    
-    body {
-      font-family: 'Tajawal', sans-serif;
-    }
-    
-    /* ===== شاشة التحميل ===== */
-    #splash {
-      position: fixed;
-      inset: 0;
-      background: linear-gradient(135deg, #1e1b4b 0%, #312e81 30%, #4f46e5 60%, #7c3aed 100%);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      transition: opacity 0.6s ease, transform 0.6s ease;
-    }
-    
-    #splash.hide {
-      opacity: 0;
-      transform: scale(1.05);
-      pointer-events: none;
-    }
-    
-    .splash-logo {
-      width: 100px;
-      height: 100px;
-      background: rgba(255,255,255,0.15);
-      backdrop-filter: blur(20px);
-      border-radius: 28px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 48px;
-      margin-bottom: 24px;
-      border: 2px solid rgba(255,255,255,0.25);
-      animation: logoPulse 2s ease-in-out infinite;
-    }
-    
-    @keyframes logoPulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-    }
-    
-    .splash-title {
-      color: white;
-      font-size: 28px;
-      font-weight: 900;
-      margin-bottom: 10px;
-      text-shadow: 0 2px 10px rgba(0,0,0,0.3);
-    }
-    
-    .splash-sub {
-      color: rgba(255,255,255,0.85);
-      font-size: 15px;
-      font-weight: 500;
-      margin-bottom: 40px;
-    }
-    
-    .splash-loader {
-      width: 200px;
-      height: 4px;
-      background: rgba(255,255,255,0.15);
-      border-radius: 10px;
-      overflow: hidden;
-    }
-    
-    .splash-loader-bar {
-      height: 100%;
-      background: linear-gradient(90deg, #a5b4fc, #c4b5fd, #f0abfc);
-      border-radius: 10px;
-      width: 0%;
-      animation: loadBar 2s ease-in-out forwards;
-    }
-    
-    @keyframes loadBar {
-      0% { width: 0%; }
-      50% { width: 70%; }
-      100% { width: 100%; }
-    }
-    
-    .splash-footer {
-      position: absolute;
-      bottom: 30px;
-      color: rgba(255,255,255,0.6);
-      font-size: 12px;
-    }
-    
-    /* ===== الـ iframe ===== */
-    #appFrame {
-      position: fixed;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      border: none;
-      opacity: 0;
-      transition: opacity 0.5s ease;
-      background: white;
-    }
-    
-    #appFrame.show { opacity: 1; }
-    
-    /* ===== زر التثبيت ===== */
-    #installBanner {
-      display: none;
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: linear-gradient(135deg, #10b981, #059669);
-      color: white;
-      padding: 14px 24px;
-      border-radius: 50px;
-      font-family: 'Tajawal', sans-serif;
-      font-size: 14px;
-      font-weight: 700;
-      box-shadow: 0 10px 30px rgba(16,185,129,0.4);
-      z-index: 2000;
-      cursor: pointer;
-      border: none;
-      animation: slideUp 0.5s ease;
-      align-items: center;
-      gap: 8px;
-    }
-    
-    @keyframes slideUp {
-      from { transform: translateX(-50%) translateY(30px); opacity: 0; }
-      to { transform: translateX(-50%) translateY(0); opacity: 1; }
-    }
-    
-    /* ===== زر الطوارئ ===== */
-    #fallbackBtn {
-      display: none;
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: linear-gradient(135deg, #ef4444, #dc2626);
-      color: white;
-      padding: 14px 24px;
-      border-radius: 50px;
-      font-family: 'Tajawal', sans-serif;
-      font-size: 14px;
-      font-weight: 700;
-      box-shadow: 0 10px 30px rgba(239,68,68,0.4);
-      z-index: 2000;
-      cursor: pointer;
-      border: none;
-      text-decoration: none;
-      animation: slideUp 0.5s ease;
-      align-items: center;
-      gap: 8px;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>نظام المتابعة - إدارة ديروط التعليمية</title>
+
+<!-- ========== وسوم PWA ========== -->
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#4f46e5">
+<meta name="color-scheme" content="dark">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="متابعة ديروط">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<link rel="icon" type="image/png" href="./icon-192.png">
+
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;width:100%;overflow:hidden;background:#1e1b4b;font-family:'Tajawal',sans-serif}
+
+/* ===== iframe الحامل للنظام ===== */
+#appFrame{position:fixed;inset:0;width:100%;height:100%;border:none;background:#fff;opacity:0;transition:opacity .6s ease;z-index:1}
+#appFrame.show{opacity:1}
+
+/* ===== شاشة الإقلاع ===== */
+#splash{position:fixed;inset:0;z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;
+background:linear-gradient(135deg,#1e1b4b 0%,#312e81 40%,#4338ca 100%);transition:opacity .8s ease,transform .8s ease}
+#splash.hide{opacity:0;transform:scale(1.08);pointer-events:none}
+.splash-logo{width:110px;height:110px;display:flex;align-items:center;justify-content:center;font-size:52px;
+background:rgba(255,255,255,.14);border:2px solid rgba(255,255,255,.25);border-radius:30px;backdrop-filter:blur(12px);
+margin-bottom:26px;animation:pulse 2.2s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+.splash-title{color:#fff;font-size:26px;font-weight:900;margin-bottom:8px}
+.splash-sub{color:rgba(255,255,255,.8);font-size:14px;font-weight:500;margin-bottom:42px}
+.splash-loader{width:220px;height:5px;background:rgba(255,255,255,.15);border-radius:10px;overflow:hidden}
+.splash-loader span{display:block;height:100%;width:0;background:linear-gradient(90deg,#a5b4fc,#c4b5fd,#f0abfc);border-radius:10px;animation:load 2.4s ease forwards}
+@keyframes load{0%{width:0}50%{width:70%}100%{width:100%}}
+.splash-footer{position:absolute;bottom:28px;color:rgba(255,255,255,.55);font-size:12px;font-weight:600}
+
+/* ===== الأزرار العائمة ===== */
+.float-btn{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:2000;display:none;align-items:center;gap:9px;
+border:none;cursor:pointer;padding:14px 26px;border-radius:50px;font-family:'Tajawal',sans-serif;font-size:14px;font-weight:800;
+color:#fff;text-decoration:none;box-shadow:0 12px 32px rgba(0,0,0,.35);animation:slideUp .5s ease}
+@keyframes slideUp{from{opacity:0;transform:translate(-50%,30px)}to{opacity:1;transform:translate(-50%,0)}}
+#installBanner{background:linear-gradient(135deg,#10b981,#059669)}
+#fallbackBtn{background:linear-gradient(135deg,#ef4444,#dc2626)}
+
+/* ===== دليل تثبيت آيفون ===== */
+#iosBanner{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:2000;display:none;max-width:92%;
+background:rgba(30,27,75,.96);border:1px solid rgba(255,255,255,.2);color:#fff;padding:14px 18px;border-radius:16px;
+font-size:12.5px;font-weight:700;line-height:1.9;box-shadow:0 12px 32px rgba(0,0,0,.4)}
+#iosBanner b{color:#a5b4fc}
+</style>
 </head>
 <body>
 
-  <!-- شاشة التحميل -->
-  <div id="splash">
-    <div class="splash-logo">🏫</div>
-    <div class="splash-title">إدارة ديروط التعليمية</div>
-    <div class="splash-sub">نظام المتابعة اليومية للمدارس</div>
-    <div class="splash-loader">
-      <div class="splash-loader-bar"></div>
-    </div>
-    <div class="splash-footer">
-      تصميم وتطوير: أ/ محمود حسن خرابة
-    </div>
-  </div>
+<!-- شاشة الإقلاع -->
+<div id="splash">
+  <div class="splash-logo">🏫</div>
+  <div class="splash-title">إدارة ديروط التعليمية</div>
+  <div class="splash-sub">نظام المتابعة اليومية للمدارس</div>
+  <div class="splash-loader"><span></span></div>
+  <div class="splash-footer">تصميم وتطوير: أ/ محمود حسن خرابة</div>
+</div>
 
-  <!-- الـ iframe -->
-  <iframe id="appFrame" 
-    src="https://script.google.com/macros/s/AKfycby8yzUjJ00bFWpjvVVN3ChfEV6xfMIu1_f9BWzOpNPnNbRt3AwM-r6N1fIiGsXA3WM/exec"
-    sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-top-navigation"
-    allow="fullscreen; camera; microphone; geolocation"
-    title="نظام المتابعة">
-  </iframe>
+<!-- =====================================================
+     iframe النظام — بدون sandbox عمدًا:
+     المحتوى المضمّن هو تطبيقنا الموثوق (Apps Script)،
+     والـ sandbox كان يحجب confirm() والتنزيلات داخله.
+     البديل المعلَّق بالأسفل إن أردت إبقاءه يومًا ما.
+===================================================== -->
+<iframe id="appFrame"
+  src="https://script.google.com/macros/s/AKfycby8yzUjJ00bFWpjvVVN3ChfEV6xfMIu1_f9BWzOpNPnNbRt3AwM-r6N1fIiGsXA3WM/exec"
+  allow="fullscreen; camera; microphone; geolocation; clipboard-write"
+  title="نظام المتابعة اليومية">
+</iframe>
+<!-- البديل مع sandbox إن لزم:
+<iframe id="appFrame" src="نفس_الرابط_أعلاه"
+  sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-downloads allow-top-navigation-by-user-activation allow-presentation"
+  allow="fullscreen; camera; microphone; geolocation; clipboard-write" title="نظام المتابعة اليومية"></iframe>
+-->
 
-  <!-- زر التثبيت -->
-  <button id="installBanner" onclick="installApp()">
-    📲 تثبيت التطبيق
-  </button>
+<button id="installBanner" class="float-btn" onclick="installApp()">📲 تثبيت التطبيق</button>
+<a id="fallbackBtn" class="float-btn" href="#" target="_blank" rel="noopener">🔗 فتح التطبيق مباشرة</a>
 
-  <!-- زر الطوارئ -->
-  <a id="fallbackBtn" href="#" target="_blank">
-    🔗 فتح التطبيق مباشرة
-  </a>
+<div id="iosBanner">
+  📲 <b>لتثبيت التطبيق على iPhone:</b><br>
+  1️⃣ اضغط زر المشاركة <b>⎋</b> أسفل Safari<br>
+  2️⃣ اختر «إضافة إلى شاشة البداية» <b>+</b><br>
+  3️⃣ اضغط «إضافة» — وسيفتح كتطبيق مستقل
+</div>
 
-  <script>
-    // ===== رابط التطبيق =====
-    const APP_URL = 'https://script.google.com/macros/s/AKfycby8yzUjJ00bFWpjvVVN3ChfEV6xfMIu1_f9BWzOpNPnNbRt3AwM-r6N1fIiGsXA3WM/exec';
-    document.getElementById('fallbackBtn').href = APP_URL;
+<script>
+var APP_URL = 'https://script.google.com/macros/s/AKfycby8yzUjJ00bFWpjvVVN3ChfEV6xfMIu1_f9BWzOpNPnNbRt3AwM-r6N1fIiGsXA3WM/exec';
+document.getElementById('fallbackBtn').href = APP_URL;
 
-    const frame = document.getElementById('appFrame');
-    const splash = document.getElementById('splash');
-    const fallbackBtn = document.getElementById('fallbackBtn');
+var frame  = document.getElementById('appFrame');
+var splash = document.getElementById('splash');
 
-    // ===== إخفاء شاشة التحميل =====
-    frame.onload = function() {
-      setTimeout(() => {
-        splash.classList.add('hide');
-        frame.classList.add('show');
-      }, 500);
-    };
+/* إخفاء الإقلاع فور جاهزية النظام */
+frame.addEventListener('load', function () {
+  setTimeout(function () { splash.classList.add('hide'); frame.classList.add('show'); }, 600);
+});
 
-    // ===== خطة الطوارئ =====
-    setTimeout(() => {
-      if (!splash.classList.contains('hide')) {
-        splash.style.opacity = '0.3';
-        fallbackBtn.style.display = 'flex';
-      }
-    }, 8000);
+/* خطة طوارئ: تحميل أبطأ من 10 ثوانٍ */
+setTimeout(function () {
+  if (!splash.classList.contains('hide')) {
+    splash.style.opacity = '.35';
+    document.getElementById('fallbackBtn').style.display = 'flex';
+  }
+}, 10000);
 
-    // ===== PWA Install =====
-    let deferredPrompt;
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      setTimeout(() => {
-        document.getElementById('installBanner').style.display = 'flex';
-      }, 3000);
-    });
+/* ===== تثبيت PWA (أندرويد / كروم / سطح مكتب) ===== */
+var deferredPrompt = null;
+function isStandalone() {
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
+window.addEventListener('beforeinstallprompt', function (e) {
+  e.preventDefault(); deferredPrompt = e;
+  setTimeout(function () {
+    if (!isStandalone()) document.getElementById('installBanner').style.display = 'flex';
+  }, 3000);
+});
+function installApp() {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(function (c) {
+    if (c.outcome === 'accepted') document.getElementById('installBanner').style.display = 'none';
+    deferredPrompt = null;
+  });
+}
 
-    function installApp() {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then(() => {
-          document.getElementById('installBanner').style.display = 'none';
-          deferredPrompt = null;
-        });
-      }
-    }
+/* ===== دليل آيفون ===== */
+(function () {
+  var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  if (isIOS && !isStandalone()) setTimeout(function () { document.getElementById('iosBanner').style.display = 'block'; }, 2500);
+})();
 
-    // ===== Service Worker =====
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js')
-        .then(() => console.log('SW OK'))
-        .catch(err => console.log('SW Error:', err));
-    }
-  </script>
+/* ===== Service Worker ===== */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('./sw.js').catch(function (e) { console.warn('SW:', e); });
+  });
+}
+</script>
 </body>
 </html>
