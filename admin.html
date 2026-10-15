@@ -1,1 +1,374 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>لوحة التحكم - إدارة ديروط التعليمية</title>
 
+<!-- ========== PWA & SEO Meta ========== -->
+<link rel="manifest" href="./manifest-admin.json">
+<meta name="theme-color" content="#1e1b4b">
+<meta name="color-scheme" content="dark light">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="لوحة ديروط">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+
+<!-- ========== Security: CSP & Permissions ========== -->
+<meta http-equiv="Content-Security-Policy" 
+      content="default-src 'self'; 
+               frame-src https://script.google.com https://*.googleusercontent.com https://*.google.com; 
+               style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; 
+               font-src https://fonts.gstatic.com; 
+               img-src 'self' data: blob:; 
+               script-src 'self' 'unsafe-inline';
+               connect-src 'self' https://script.google.com;">
+<meta name="permissions-policy" content="camera=(), microphone=(), geolocation=()">
+
+<!-- ========== Icons ========== -->
+<link rel="apple-touch-icon" href="./icon-admin-192.png">
+<link rel="icon" type="image/png" href="./icon-admin-192.png">
+
+<!-- ========== Fonts & Preconnect (Performance) ========== -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://script.google.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --primary-dark: #1e1b4b;
+  --primary-darker: #0f172a;
+  --accent-gold: #fbbf24;
+  --accent-orange: #f59e0b;
+  --danger: #ef4444;
+  --text-light: rgba(255, 255, 255, 0.85);
+  --text-muted: rgba(255, 255, 255, 0.55);
+  --glass-bg: rgba(30, 27, 75, 0.96);
+  --shadow-heavy: 0 22px 60px rgba(0, 0, 0, 0.4);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; width: 100%; overflow: hidden; background: var(--primary-dark); font-family: 'Tajawal', sans-serif; }
+
+/* ========== Iframe Layer ========== */
+#appFrame {
+  position: fixed; inset: 0; width: 100%; height: 100%; border: none; 
+  background: #fff; opacity: 0; transition: opacity .6s ease; z-index: 1;
+}
+#appFrame.show { opacity: 1; }
+
+/* ========== Splash Screen ========== */
+#splash {
+  position: fixed; inset: 0; z-index: 1000; display: flex; flex-direction: column; 
+  align-items: center; justify-content: center;
+  background: linear-gradient(135deg, var(--primary-darker) 0%, var(--primary-dark) 45%, #312e81 100%);
+  transition: opacity .8s ease, transform .8s ease;
+}
+#splash.hide { opacity: 0; transform: scale(1.08); pointer-events: none; }
+
+.splash-logo {
+  width: 120px; height: 120px; display: flex; align-items: center; justify-content: center; 
+  font-size: 56px;
+  background: linear-gradient(135deg, rgba(251,191,36,.18), rgba(245,158,11,.18));
+  border: 2px solid rgba(251,191,36,.45);
+  border-radius: 34px; backdrop-filter: blur(14px); margin-bottom: 26px;
+  animation: pulse 2.4s ease-in-out infinite;
+  box-shadow: 0 22px 60px rgba(251,191,36,.28);
+}
+@keyframes pulse { 0%, 100% { transform: scale(1) rotate(0); } 50% { transform: scale(1.07) rotate(4deg); } }
+
+.splash-title { color: var(--accent-gold); font-size: 28px; font-weight: 900; margin-bottom: 8px; text-shadow: 0 4px 22px rgba(251,191,36,.4); }
+.splash-sub { color: var(--text-light); font-size: 14px; font-weight: 600; margin-bottom: 44px; text-align: center; padding: 0 20px; }
+
+.splash-loader { width: 240px; height: 5px; background: rgba(255,255,255,.12); border-radius: 10px; overflow: hidden; }
+.splash-loader span { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--accent-gold), var(--accent-orange), #f97316); border-radius: 10px; animation: load 2.5s ease forwards; }
+@keyframes load { 0% { width: 0; } 40% { width: 45%; } 100% { width: 100%; } }
+
+.splash-footer { position: absolute; bottom: 28px; color: var(--text-muted); font-size: 12px; font-weight: 600; }
+.splash-status { color: var(--accent-gold); font-size: 13px; font-weight: 700; margin-top: 15px; min-height: 20px; }
+
+/* ========== Floating Buttons & Banners ========== */
+.float-btn {
+  position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%); z-index: 2000; 
+  display: none; align-items: center; gap: 9px;
+  border: none; cursor: pointer; padding: 14px 26px; border-radius: 50px; 
+  font-family: 'Tajawal', sans-serif; font-size: 14px; font-weight: 800;
+  color: #fff; text-decoration: none; box-shadow: var(--shadow-heavy); 
+  animation: slideUp .5s ease;
+}
+@keyframes slideUp { from { opacity: 0; transform: translate(-50%, 30px); } to { opacity: 1; transform: translate(-50%, 0); } }
+
+#installBanner { background: linear-gradient(135deg, var(--accent-gold), var(--accent-orange)); color: var(--primary-dark); }
+#fallbackBtn { background: linear-gradient(135deg, var(--danger), #dc2626); }
+#reloadBtn { background: linear-gradient(135deg, #3b82f6, #2563eb); bottom: 90px; }
+
+/* ========== iOS & Offline Banners ========== */
+.info-banner {
+  position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%); z-index: 2000; 
+  display: none; max-width: 92%; width: 400px;
+  background: var(--glass-bg); border: 1px solid rgba(251,191,36,.35); 
+  color: #fff; padding: 16px 18px; border-radius: 16px;
+  font-size: 12.5px; font-weight: 700; line-height: 1.9; box-shadow: var(--shadow-heavy);
+  backdrop-filter: blur(10px);
+}
+.info-banner b { color: #fcd34d; }
+.info-banner .close-btn {
+  position: absolute; top: 8px; left: 8px; background: rgba(255,255,255,0.1); 
+  border: none; color: #fff; width: 24px; height: 24px; border-radius: 50%; 
+  cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center;
+}
+
+#offlineBanner {
+  background: rgba(239, 68, 68, 0.95); border-color: rgba(255,255,255,0.2); 
+  bottom: auto; top: 20px; text-align: center;
+}
+</style>
+</head>
+<body>
+
+<!-- ========== Splash Screen ========== -->
+<div id="splash">
+  <div class="splash-logo">🛡️</div>
+  <div class="splash-title">لوحة تحكم المدير العام</div>
+  <div class="splash-sub">إدارة ديروط التعليمية — وصول مقيد بالصلاحيات</div>
+  <div class="splash-loader"><span></span></div>
+  <div class="splash-status" id="splashStatus">جاري تأمين الاتصال...</div>
+  <div class="splash-footer">تصميم وتطوير: أ/ محمود حسن خرابة</div>
+</div>
+
+<!-- ========== Offline Banner ========== -->
+<div id="offlineBanner" class="info-banner" style="display:none;">
+  ⚠️ <b>أنت غير متصل بالإنترنت.</b><br>قد لا تعمل بعض الوظائف بشكل صحيح.
+</div>
+
+<!-- ========== Main App Iframe ========== -->
+<!-- 
+  ملاحظة أمنية: تم إزالة sandbox عمدًا. 
+  السبب: بيئة Google Apps Script تستخدم google.script.run الذي يتطلب Top-Level Navigation 
+  وتفشل داخل الـ Sandbox المقيد. نعوض عن ذلك بـ CSP صارم و Referrer Policy.
+-->
+<iframe id="appFrame"
+  src="https://script.google.com/macros/s/AKfycby8yzUjJ00bFWpjvVVN3ChfEV6xfMIu1_f9BWzOpNPnNbRt3AwM-r6N1fIiGsXA3WM/exec?admin=true"
+  allow="fullscreen; clipboard-write"
+  title="لوحة تحكم المدير العام"
+  referrerpolicy="no-referrer">
+</iframe>
+
+<!-- ========== Action Buttons ========== -->
+<button id="reloadBtn" class="float-btn" onclick="AdminPWA.reloadApp()">🔄 إعادة تحميل اللوحة</button>
+<button id="installBanner" class="float-btn" onclick="AdminPWA.installApp()">📲 تثبيت لوحة التحكم كتطبيق</button>
+<a id="fallbackBtn" class="float-btn" href="#" target="_blank" rel="noopener noreferrer">🔗 فتح لوحة التحكم مباشرة</a>
+
+<!-- ========== iOS Instructions Banner ========== -->
+<div id="iosBanner" class="info-banner">
+  <button class="close-btn" onclick="AdminPWA.dismissIosBanner()" aria-label="إغلاق">&times;</button>
+  📲 <b>لتثبيت اللوحة على iPhone:</b><br>
+  1️⃣ اضغط زر المشاركة <b>⎋</b> أسفل Safari<br>
+  2️⃣ اختر «إضافة إلى شاشة البداية» <b>+</b><br>
+  3️⃣ اضغط «إضافة» — وستفتح كتطبيق مستقل
+</div>
+
+<script>
+/**
+ * ═══════════════════════════════════════════════════════════════════
+ *  Admin PWA Controller - Secure & Robust Wrapper
+ *  Architecture: Module Pattern (IIFE) | Strict Mode
+ * ═══════════════════════════════════════════════════════════════════
+ */
+const AdminPWA = (() => {
+    'use strict';
+
+    // ─── Configuration ───
+    const CONFIG = {
+        APP_URL: 'https://script.google.com/macros/s/AKfycby8yzUjJ00bFWpjvVVN3ChfEV6xfMIu1_f9BWzOpNPnNbRt3AwM-r6N1fIiGsXA3WM/exec?admin=true',
+        TIMEOUT_WARNING: 6000,  // 6 seconds: Show status warning
+        TIMEOUT_FALLBACK: 12000, // 12 seconds: Show fallback buttons
+        IOS_BANNER_KEY: 'dyrout_admin_ios_banner_dismissed'
+    };
+
+    // ─── DOM Elements ───
+    const DOM = {
+        frame: document.getElementById('appFrame'),
+        splash: document.getElementById('splash'),
+        splashStatus: document.getElementById('splashStatus'),
+        installBanner: document.getElementById('installBanner'),
+        fallbackBtn: document.getElementById('fallbackBtn'),
+        reloadBtn: document.getElementById('reloadBtn'),
+        iosBanner: document.getElementById('iosBanner'),
+        offlineBanner: document.getElementById('offlineBanner')
+    };
+
+    let deferredPrompt = null;
+    let loadTimeoutWarning = null;
+    let loadTimeoutFallback = null;
+    let isAppLoaded = false;
+
+    // ─── Initialization ───
+    function init() {
+        setupSecurity();
+        setupNetworkListeners();
+        setupPWA();
+        setupIframeLoading();
+        setupIOSBanner();
+        registerServiceWorker();
+    }
+
+    // ─── Security Measures ───
+    function setupSecurity() {
+        // Disable right-click context menu on the wrapper
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        
+        // Disable F12 and common dev tools shortcuts
+        document.addEventListener('keydown', e => {
+            if (e.key === 'F12' || 
+               (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) || 
+               (e.ctrlKey && e.key.toUpperCase() === 'U')) {
+                e.preventDefault();
+            }
+        });
+    }
+
+    // ─── Network Awareness ───
+    function setupNetworkListeners() {
+        function updateNetworkStatus() {
+            if (!navigator.onLine) {
+                DOM.offlineBanner.style.display = 'block';
+            } else {
+                DOM.offlineBanner.style.display = 'none';
+            }
+        }
+        window.addEventListener('online', updateNetworkStatus);
+        window.addEventListener('offline', updateNetworkStatus);
+        updateNetworkStatus();
+    }
+
+    // ─── Iframe Loading State Machine ───
+    function setupIframeLoading() {
+        DOM.fallbackBtn.href = CONFIG.APP_URL;
+
+        DOM.frame.addEventListener('load', () => {
+            isAppLoaded = true;
+            clearTimeout(loadTimeoutWarning);
+            clearTimeout(loadTimeoutFallback);
+            setTimeout(() => {
+                DOM.splash.classList.add('hide');
+                DOM.frame.classList.add('show');
+            }, 400);
+        });
+
+        DOM.frame.addEventListener('error', () => {
+            handleLoadFailure();
+        });
+
+        // Stage 1: Warning
+        loadTimeoutWarning = setTimeout(() => {
+            if (!isAppLoaded) {
+                DOM.splashStatus.textContent = '⏳ الشبكة بطيئة... جاري تأمين الاتصال';
+                DOM.splashStatus.style.color = '#f59e0b';
+            }
+        }, CONFIG.TIMEOUT_WARNING);
+
+        // Stage 2: Fallback
+        loadTimeoutFallback = setTimeout(() => {
+            if (!isAppLoaded) {
+                handleLoadFailure();
+            }
+        }, CONFIG.TIMEOUT_FALLBACK);
+    }
+
+    function handleLoadFailure() {
+        DOM.splashStatus.textContent = '⚠️ تعذر تحميل اللوحة تلقائياً';
+        DOM.splashStatus.style.color = '#ef4444';
+        DOM.splash.querySelector('.splash-loader').style.display = 'none';
+        
+        // Show recovery buttons
+        DOM.reloadBtn.style.display = 'flex';
+        DOM.fallbackBtn.style.display = 'flex';
+    }
+
+    function reloadApp() {
+        DOM.reloadBtn.style.display = 'none';
+        DOM.fallbackBtn.style.display = 'none';
+        DOM.splashStatus.textContent = 'جاري إعادة الاتصال...';
+        DOM.splashStatus.style.color = '#fbbf24';
+        DOM.splash.querySelector('.splash-loader').style.display = 'block';
+        
+        // Force iframe reload
+        DOM.frame.src = DOM.frame.src;
+        setupIframeLoading(); // Reset timers
+    }
+
+    // ─── PWA Installation ───
+    function setupPWA() {
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            setTimeout(() => {
+                if (!isStandalone()) DOM.installBanner.style.display = 'flex';
+            }, 3000);
+        });
+    }
+
+    function installApp() {
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === 'accepted') {
+                DOM.installBanner.style.display = 'none';
+            }
+            deferredPrompt = null;
+        });
+    }
+
+    function isStandalone() {
+        return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    }
+
+    // ─── iOS Banner Logic ───
+    function setupIOSBanner() {
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        const isDismissed = localStorage.getItem(CONFIG.IOS_BANNER_KEY) === 'true';
+        
+        if (isIOS && !isStandalone() && !isDismissed) {
+            setTimeout(() => {
+                DOM.iosBanner.style.display = 'block';
+            }, 2500);
+        }
+    }
+
+    function dismissIosBanner() {
+        DOM.iosBanner.style.display = 'none';
+        try {
+            localStorage.setItem(CONFIG.IOS_BANNER_KEY, 'true');
+        } catch (e) { /* LocalStorage might be disabled in private mode */ }
+    }
+
+    // ─── Service Worker ───
+    function registerServiceWorker() {
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw-admin.js').catch(err => {
+                    console.warn('SW Registration failed:', err);
+                });
+            });
+        }
+    }
+
+    // ─── Public API ───
+    return {
+        init,
+        installApp,
+        dismissIosBanner,
+        reloadApp
+    };
+
+})();
+
+// ─── Bootstrap ───
+document.addEventListener('DOMContentLoaded', AdminPWA.init);
+</script>
+</body>
+</html>
