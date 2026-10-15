@@ -165,17 +165,9 @@
         <div class="splash-legal">© 2026 كافة حقوق الملكية الفكرية للمنصة محفوظة لمالكها المطور — الانتفاع بموجب اشتراك سنوي متجدد (SaaS)</div>
     </div>
 
-   <script src="./config.js"></script>
-    <script>
-        // ── تطبيق الإعدادات من config.js ──
-        const APP_URL = PWA_CONFIG.APP_URL;
-        document.getElementById('appFrame').src = APP_URL;
-        document.getElementById('fallbackBtn').href = APP_URL;
-    </script>
-    
     <!-- 🖥️ App Frame -->
     <iframe id="appFrame" 
-            src="" 
+            src="https://script.google.com/macros/s/AKfycby8yzUjJ00bFWpjvVVN3ChfEV6xfMIu1_f9BWzOpNPnNbRt3AwM-r6N1fIiGsXA3WM/exec" 
             allow="fullscreen; camera; microphone; geolocation; clipboard-write" 
             title="منظومة رَصْد للمتابعة"></iframe>
 
@@ -199,10 +191,10 @@
 
             // ⚙️ Configuration
             const CONFIG = {
-                APP_URL: APP_URL, // استخدام القيمة من PWA_CONFIG
+                APP_URL: 'https://script.google.com/macros/s/AKfycby8yzUjJ00bFWpjvVVN3ChfEV6xfMIu1_f9BWzOpNPnNbRt3AwM-r6N1fIiGsXA3WM/exec',
                 TIMINGS: {
-                    SLOW_NETWORK_THRESHOLD: 6000,
-                    FAIL_THRESHOLD: 12000
+                    SLOW_NETWORK_THRESHOLD: 6000, // 6 seconds
+                    FAIL_THRESHOLD: 12000          // 12 seconds
                 },
                 STORAGE_KEYS: {
                     IOS_BANNER_DISMISSED: 'rasad_ios_banner_dismissed'
